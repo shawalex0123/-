@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026国庆·湘西南六家六车自驾超详行程地图</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -60;
+      }
+    }
+    .route-flow {
+      stroke-dasharray: 10 8;
+      animation: dash 3s linear infinite;
+    }
+    .card-shadow {
+      box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.14), 0 8px 12px -6px rgba(0, 0, 0, 0.08);
+    }
+    .arrow-pulse {
+      animation: pulse 1.8s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    .map-scale-container {
+      transition: transform 0.25s ease-out;
+      transform-origin: top left;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased p-3 md:p-6 min-h-screen">
+
+  <div class="max-w-7xl mx-auto space-y-5">
+    
+    <!-- Top Header -->
+    <header class="bg-white border border-slate-200 rounded-3xl p-5 md:p-7 card-shadow flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="px-3 py-1 text-xs font-black bg-amber-500 text-white rounded-full shadow-xs">国庆亲子自驾</span>
+          <span class="px-3 py-1 text-xs font-bold bg-blue-100 text-blue-800 rounded-full">10/2 - 10/5 · 4天3晚</span>
+          <span class="px-3 py-1 text-xs font-bold bg-emerald-100 text-emerald-800 rounded-full">六家六车编队</span>
+          <span class="px-3 py-1 text-xs font-bold bg-purple-100 text-purple-800 rounded-full">清晰先后行车顺序</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-black text-slate-900 mt-2 tracking-tight flex items-center gap-2">
+          <span>🚙</span> 湘西南自驾环线全景超详手绘地图
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">
+          循序游览路线：①长沙集合 ➔ ②邵阳午餐 ➔ ③崀山辣椒峰 ➔ ④皇都侗寨 ➔ ⑤万佛山 ➔ ⑥玉带河 ➔ ⑦错峰返长
+        </p>
+      </div>
+
+      <!-- Quick Metrics & Map Zoom Controls -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center bg-slate-100 border border-slate-300 rounded-xl p-1 text-xs font-bold">
+          <button onclick="setZoom(0.85)" class="px-2.5 py-1.5 rounded-lg hover:bg-white transition text-slate-700">85%</button>
+          <button onclick="setZoom(1.0)" class="px-2.5 py-1.5 rounded-lg bg-white shadow-xs text-blue-700">100%</button>
+          <button onclick="setZoom(1.2)" class="px-2.5 py-1.5 rounded-lg hover:bg-white transition text-slate-700">120% 放大</button>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 px-4 py-2 rounded-2xl text-center hidden sm:block">
+          <div class="text-xs text-blue-600 font-medium">总行驶里程</div>
+          <div class="text-lg font-black text-blue-900">~1040 km</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sequence Navigation Banner (清楚呈现先后顺序) -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-3.5 card-shadow overflow-x-auto no-scrollbar">
+      <div class="flex items-center gap-2 min-w-[760px] text-xs font-bold">
+        <span class="text-slate-400 whitespace-nowrap">🚘 行车时序：</span>
+        
+        <div onclick="showDetail('changsha')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 cursor-pointer hover:bg-blue-100 transition whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">①</span>
+          <span>D1晨 长沙启程</span>
+        </div>
+        <span class="text-blue-500 font-black">➔</span>
+
+        <div onclick="showDetail('shaoyang')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 cursor-pointer hover:bg-amber-100 transition whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px]">②</span>
+          <span>D1午 邵阳中停</span>
+        </div>
+        <span class="text-amber-500 font-black">➔</span>
+
+        <div onclick="showDetail('langshan')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-pointer hover:bg-emerald-100 transition whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">③</span>
+          <span>D1宿/D2玩 崀山辣椒峰</span>
+        </div>
+        <span class="text-emerald-500 font-black">➔</span>
+
+        <div onclick="showDetail('huangdu')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 cursor-pointer hover:bg-purple-100 transition whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">④</span>
+          <span>D2晚 皇都侗寨</span>
+        </div>
+        <span class="text-purple-500 font-black">➔</span>
+
+        <div onclick="showDetail('wanfoshan')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 cursor-pointer hover:bg-amber-100 transition whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px]">⑤</span>
+          <span>D3早 万佛山峰林</span>
+        </div>
+        <span class="text-amber-500 font-black">➔</span>
+
+        <div onclick="showDetail('tongdao')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-50 text-teal-800 border border-teal-200 cursor-pointer hover:bg-teal-100 transition whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px]">⑥</span>
+          <span>D3下 玉带河漫步</span>
+        </div>
+        <span class="text-teal-500 font-black">➔</span>
+
+        <div onclick="showDetail('changsha')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 text-red-700 border border-red-200 cursor-pointer hover:bg-red-100 transition whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px]">⑦</span>
+          <span>D4 晨光错峰返长</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map Canvas Container (Large horizontal SVG map with full sequence arrows) -->
+    <div class="overflow-x-auto rounded-3xl border border-slate-300 card-shadow bg-slate-900/5">
+      <div id="map-inner-wrapper" class="map-scale-container relative bg-gradient-to-b from-sky-50 via-blue-50/40 to-emerald-50/50 min-w-[1100px] h-[820px] p-6 overflow-hidden select-none">
+
+        <!-- Topographic background rivers and labels -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-45" viewBox="0 0 1100 820" fill="none">
+          <path d="M 940,20 Q 900,130 850,200 T 790,340 T 770,540" stroke="#93c5fd" stroke-width="10" stroke-linecap="round"/>
+          <path d="M 850,200 Q 700,260 550,300 T 400,480" stroke="#93c5fd" stroke-width="6" stroke-linecap="round"/>
+          <path d="M 550,300 Q 460,400 420,520 T 390,660" stroke="#93c5fd" stroke-width="5" stroke-linecap="round" stroke-dasharray="6 6"/>
+          <text x="880" y="260" fill="#60a5fa" font-size="16" font-weight="bold">湘 江</text>
+          <text x="570" y="270" fill="#60a5fa" font-size="15" font-weight="bold">资 水</text>
+          <text x="290" y="470" fill="#34d399" font-size="15" font-weight="bold">雪峰山脉</text>
+          <text x="140" y="720" fill="#60a5fa" font-size="14" font-weight="bold">坪坦河 · 巫水</text>
+        </svg>
+
+        <!-- Main Interactive SVG Roads and Arrows -->
+        <svg class="absolute inset-0 w-full h-full z-10" viewBox="0 0 1100 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Big Arrow marker for D1, D2, D3, D4 -->
+            <marker id="arrow-blue" viewBox="0 0 12 12" refX="8" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M 1 2 L 10 6 L 1 10 z" fill="#2563eb" />
+            </marker>
+            <marker id="arrow-purple" viewBox="0 0 12 12" refX="8" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M 1 2 L 10 6 L 1 10 z" fill="#7c3aed" />
+            </marker>
+            <marker id="arrow-amber" viewBox="0 0 12 12" refX="8" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M 1 2 L 10 6 L 1 10 z" fill="#d97706" />
+            </marker>
+            <marker id="arrow-red" viewBox="0 0 12 12" refX="8" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M 1 2 L 10 6 L 1 10 z" fill="#dc2626" />
+            </marker>
+          </defs>
+
+          <!-- ================= ROUTE LINES ================= -->
+          <!-- Leg 1 (D1): ① Changsha (830, 160) -> ② Shaoyang (560, 275) -->
+          <g id="leg-1">
+            <path d="M 820,175 Q 690,205 570,275" stroke="#93c5fd" stroke-width="14" stroke-linecap="round" opacity="0.6"/>
+            <path d="M 820,175 Q 690,205 570,275" stroke="#2563eb" stroke-width="6" stroke-linecap="round" class="route-flow" marker-mid="url(#arrow-blue)"/>
+          </g>
+
+          <!-- Leg 2 (D1): ② Shaoyang (545, 300) -> ③ Langshan (430, 480) -->
+          <g id="leg-2">
+            <path d="M 545,300 Q 480,380 435,475" stroke="#93c5fd" stroke-width="14" stroke-linecap="round" opacity="0.6"/>
+            <path d="M 545,300 Q 480,380 435,475" stroke="#2563eb" stroke-width="6" stroke-linecap="round" class="route-flow"/>
+          </g>
+
+          <!-- Leg 3 (D2): ③ Langshan (410, 500) -> ④ Tongdao Base (230, 545) -->
+          <g id="leg-3">
+            <path d="M 405,505 Q 310,515 235,545" stroke="#c4b5fd" stroke-width="14" stroke-linecap="round" opacity="0.6"/>
+            <path d="M 405,505 Q 310,515 235,545" stroke="#7c3aed" stroke-width="6" stroke-linecap="round" class="route-flow"/>
+          </g>
+
+          <!-- Leg 4 (D2晚): Tongdao Base (210, 570) -> ④ Huangdu (160, 650) -->
+          <g id="leg-4">
+            <path d="M 210,570 Q 185,605 165,645" stroke="#c4b5fd" stroke-width="12" stroke-linecap="round" opacity="0.6"/>
+            <path d="M 210,570 Q 185,605 165,645" stroke="#7c3aed" stroke-width="5" stroke-linecap="round" class="route-flow"/>
+          </g>
+
+          <!-- Leg 5 (D3早): Tongdao Base (235, 560) -> ⑤ Wanfoshan (285, 650) -->
+          <g id="leg-5">
+            <path d="M 235,560 Q 255,600 285,645" stroke="#fed7aa" stroke-width="12" stroke-linecap="round" opacity="0.7"/>
+            <path d="M 235,560 Q 255,600 285,645" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" class="route-flow"/>
+          </g>
+
+          <!-- Leg 7 (D4): Tongdao (215, 520) -> ⑦ Return corridor -> Changsha (815, 175) -->
+          <g id="leg-7">
+            <path d="M 215,520 Q 380,360 590,260 T 815,175" stroke="#fca5a5" stroke-width="12" stroke-linecap="round" opacity="0.45" stroke-dasharray="12 10"/>
+            <path d="M 215,520 Q 380,360 590,260 T 815,175" stroke="#dc2626" stroke-width="5" stroke-linecap="round" stroke-dasharray="10 8" class="route-flow"/>
+          </g>
+
+          <!-- ================= PROMINENT DIRECTIONAL CHEVRONS (清晰可见的行车箭头) ================= -->
+          <!-- 1 -> 2: Changsha to Shaoyang (pointing southwest) -->
+          <g fill="#1d4ed8" class="arrow-pulse">
+            <polygon points="730,190 715,180 720,195 715,200" transform="rotate(160, 720, 190)"/>
+            <polygon points="650,225 635,215 640,230 635,235" transform="rotate(155, 640, 225)"/>
+            <text x="690" y="180" fill="#1e40af" font-size="11" font-weight="900">① ➔ ② 方向</text>
+          </g>
+
+          <!-- 2 -> 3: Shaoyang to Langshan (pointing south-southwest) -->
+          <g fill="#1d4ed8" class="arrow-pulse">
+            <polygon points="505,345 490,335 495,350 490,355" transform="rotate(125, 495, 345)"/>
+            <polygon points="460,415 445,405 450,420 445,425" transform="rotate(120, 450, 415)"/>
+            <text x="510" y="375" fill="#1e40af" font-size="11" font-weight="900">② ➔ ③ 方向</text>
+          </g>
+
+          <!-- 3 -> 4: Langshan to Tongdao (pointing west) -->
+          <g fill="#7c3aed" class="arrow-pulse">
+            <polygon points="345,510 330,500 335,515 330,520" transform="rotate(170, 335, 510)"/>
+            <polygon points="275,530 260,520 265,535 260,540" transform="rotate(170, 265, 530)"/>
+            <text x="310" y="495" fill="#6d28d9" font-size="11" font-weight="900">③ ➔ ④ 转场方向</text>
+          </g>
+
+          <!-- 4 -> 5: Tongdao to Wanfoshan (pointing southeast) -->
+          <g fill="#d97706" class="arrow-pulse">
+            <polygon points="260,600 245,590 250,605 245,610" transform="rotate(60, 250, 600)"/>
+            <text x="265" y="595" fill="#b45309" font-size="11" font-weight="900">➔ ⑤万佛山</text>
+          </g>
+
+          <!-- 6 -> 7: Return to Changsha (pointing northeast) -->
+          <g fill="#dc2626" class="arrow-pulse">
+            <polygon points="310,430 295,420 300,435 295,440" transform="rotate(-35, 300, 430)"/>
+            <polygon points="500,295 485,285 490,300 485,305" transform="rotate(-30, 490, 295)"/>
+            <polygon points="700,205 685,195 690,210 685,215" transform="rotate(-25, 690, 205)"/>
+            <text x="440" y="325" fill="#b91c1c" font-size="12" font-weight="900">⚡ ⑦ 错峰返长路线 (大箭头往东北)</text>
+          </g>
+        </svg>
+
+        <!-- ================= HTML LOCATION CARDS WITH OBVIOUS SEQUENCE NUMBERS ================= -->
+
+        <!-- CARD 1: 长沙大本营 (序号 ①) -->
+        <div id="card-changsha" onclick="showDetail('changsha')" class="absolute top-[6%] right-[10%] w-56 bg-white rounded-2xl p-3 card-shadow border-2 border-blue-400 cursor-pointer hover:scale-105 transition transform z-20">
+          <div class="relative h-24 rounded-xl overflow-hidden bg-slate-100">
+            <img src="https://images.unsplash.com/photo-1541464522988-31b420f688b9?auto=format&fit=crop&w=400&q=80" alt="长沙" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent"></div>
+            <!-- Number 1 badge -->
+            <span class="absolute top-2 left-2 z-20 w-7 h-7 rounded-full bg-blue-600 text-white font-black text-sm flex items-center justify-center shadow-md border-2 border-white">
+              ①
+            </span>
+            <span class="absolute top-2 right-2 z-20 px-2 py-0.5 text-[10px] font-bold bg-blue-600 text-white rounded-md">🌧️ 16~21℃</span>
+            <span class="absolute bottom-1.5 left-2 text-[10px] text-blue-200 font-bold">10/2 06:40 出发 ➔ 10/5 抵长</span>
+          </div>
+          <div class="mt-2 flex items-center justify-between">
+            <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-1">
+              <span>🚩</span> 第①站·长沙大本营
+            </h3>
+            <span class="text-xs text-blue-600 font-bold">始发/终点</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-0.5">六车集结·对讲调试·全队加满油启程</p>
+        </div>
+
+        <!-- Pill 1: 长沙 -> 邵阳 (221km) -->
+        <div class="absolute top-[26%] right-[32%] z-20">
+          <div class="bg-white/95 backdrop-blur border-2 border-blue-400 px-3 py-1.5 rounded-full card-shadow flex items-center gap-2 text-xs text-blue-900 font-bold whitespace-nowrap shadow-md">
+            <span class="text-red-500 text-sm">🚗</span>
+            <span>① ➔ ②</span>
+            <span class="text-blue-700">221 km</span>
+            <span class="text-slate-300">|</span>
+            <span class="text-slate-600 font-medium">国庆预留 3.5 ~ 4.5 小时</span>
+          </div>
+        </div>
+
+        <!-- CARD 2: 邵阳市区 (序号 ②) -->
+        <div id="card-shaoyang" onclick="showDetail('shaoyang')" class="absolute top-[30%] left-[45%] w-52 bg-white rounded-2xl p-2.5 card-shadow border-2 border-amber-400 cursor-pointer hover:scale-105 transition transform z-20">
+          <div class="relative h-20 rounded-xl overflow-hidden bg-amber-50">
+            <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=400&q=80" alt="邵阳" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent"></div>
+            <!-- Number 2 badge -->
+            <span class="absolute top-1.5 left-1.5 z-20 w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center shadow-md border-2 border-white">
+              ②
+            </span>
+            <span class="absolute top-1.5 right-1.5 z-20 px-2 py-0.5 text-[10px] font-bold bg-amber-500 text-white rounded">🌧️ 17~21℃</span>
+            <span class="absolute bottom-1 left-2 text-[10px] text-amber-200 font-medium">11:00 - 12:30 嗦粉午餐</span>
+          </div>
+          <div class="mt-1.5 flex items-center justify-between">
+            <h3 class="font-extrabold text-sm text-slate-800 flex items-center gap-1">
+              <span>🍜</span> 第②站·邵阳市区
+            </h3>
+            <span class="text-[10px] text-amber-700 font-bold">午餐休整</span>
+          </div>
+          <p class="text-[11px] text-slate-500 line-clamp-1">地道牛肉粉·猪血丸子·六车大店集中</p>
+        </div>
+
+        <!-- Pill 2: 邵阳 -> 崀山 (127km) -->
+        <div class="absolute top-[50%] left-[43%] z-20">
+          <div class="bg-white/95 backdrop-blur border-2 border-blue-400 px-3 py-1.5 rounded-full card-shadow flex items-center gap-2 text-xs text-blue-900 font-bold whitespace-nowrap shadow-md">
+            <span class="text-red-500 text-sm">🚗</span>
+            <span>② ➔ ③</span>
+            <span class="text-blue-700">127 km</span>
+            <span class="text-slate-300">|</span>
+            <span class="text-slate-600 font-medium">国庆预留 2.5 ~ 3 小时</span>
+          </div>
+        </div>
+
+        <!-- CARD 3: 新宁·崀山辣椒峰 (序号 ③) -->
+        <div id="card-langshan" onclick="showDetail('langshan')" class="absolute top-[51%] left-[34%] w-60 bg-white rounded-2xl p-3 card-shadow border-2 border-emerald-500 cursor-pointer hover:scale-105 transition transform z-20">
+          <div class="relative h-28 rounded-xl overflow-hidden bg-slate-100">
+            <img src="./langshan_danxia_1790647857422.jpg" alt="崀山辣椒峰" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+            <!-- Number 3 badge -->
+            <span class="absolute top-2 left-2 z-20 w-7 h-7 rounded-full bg-emerald-600 text-white font-black text-sm flex items-center justify-center shadow-md border-2 border-white">
+              ③
+            </span>
+            <span class="absolute top-2 right-2 z-20 px-2 py-0.5 text-[10px] font-bold bg-emerald-600 text-white rounded-md">🌧️ 15~24℃ 5A</span>
+            <span class="absolute bottom-1.5 left-2 text-[10px] text-emerald-200 font-bold">D1入住 ➔ D2上午轻徒步</span>
+          </div>
+          <div class="mt-2 flex items-center justify-between">
+            <h3 class="font-black text-base text-slate-900 flex items-center gap-1">
+              <span>⛰️</span> 第③站·崀山辣椒峰
+            </h3>
+            <span class="text-xs text-emerald-700 font-bold">核心景区</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-0.5">红崖石柱擎天·柴火豆腐·14岁以下免票</p>
+        </div>
+
+        <!-- Pill 3: 崀山 -> 通道 (186km) -->
+        <div class="absolute top-[64%] left-[23%] z-20">
+          <div class="bg-white/95 backdrop-blur border-2 border-purple-400 px-3 py-1.5 rounded-full card-shadow flex items-center gap-2 text-xs text-purple-900 font-bold whitespace-nowrap shadow-md">
+            <span class="text-purple-600 text-sm">🚗</span>
+            <span>③ ➔ ④</span>
+            <span class="text-purple-700">186 km</span>
+            <span class="text-slate-300">|</span>
+            <span class="text-slate-600 font-medium">国庆预留 3 ~ 4 小时</span>
+          </div>
+        </div>
+
+        <!-- CARD 4 BASE: 通道县城大本营 (序号 ④中继/⑥) -->
+        <div id="card-tongdao" onclick="showDetail('tongdao')" class="absolute top-[57%] left-[6%] w-52 bg-white rounded-2xl p-2.5 card-shadow border-2 border-purple-400 cursor-pointer hover:scale-105 transition transform z-20">
+          <div class="relative h-20 rounded-xl overflow-hidden bg-purple-50">
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="通道" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent"></div>
+            <!-- Number 4/6 badge -->
+            <span class="absolute top-1.5 left-1.5 z-20 w-6 h-6 rounded-full bg-purple-600 text-white font-black text-xs flex items-center justify-center shadow-md border-2 border-white">
+              ④
+            </span>
+            <span class="absolute top-1.5 right-1.5 z-20 px-2 py-0.5 text-[10px] font-bold bg-purple-600 text-white rounded">🌧️ 15~23℃ 连住</span>
+            <span class="absolute bottom-1 left-2 text-[10px] text-purple-200 font-medium">通道县城基地 · 酒店宿营</span>
+          </div>
+          <div class="mt-1.5 flex items-center justify-between">
+            <h3 class="font-extrabold text-sm text-slate-800 flex items-center gap-1">
+              <span>🏮</span> 第④站·通道县城基地
+            </h3>
+            <span class="text-[10px] text-purple-700 font-bold">D2-D3宿</span>
+          </div>
+          <p class="text-[11px] text-slate-500 line-clamp-1">不折腾行李·酸汤鱼·亲子充电站</p>
+        </div>
+
+        <!-- CARD 4 SCENIC: 皇都侗文化村 (序号 ④晚) -->
+        <div id="card-huangdu" onclick="showDetail('huangdu')" class="absolute bottom-[2%] left-[4%] w-60 bg-white rounded-2xl p-3 card-shadow border-2 border-indigo-500 cursor-pointer hover:scale-105 transition transform z-20">
+          <div class="relative h-28 rounded-xl overflow-hidden bg-slate-100">
+            <img src="./huangdu_dong_village_1790647879822.jpg" alt="皇都侗文化村" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+            <span class="absolute top-2 left-2 z-20 w-7 h-7 rounded-full bg-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-md border-2 border-white">
+              ④
+            </span>
+            <span class="absolute top-2 right-2 z-20 px-2 py-0.5 text-[10px] font-bold bg-indigo-600 text-white rounded-md">🌧️ 16~22℃ 非遗</span>
+            <span class="absolute bottom-1.5 left-2 text-[10px] text-indigo-200 font-bold">D2 17:20 - 20:15 夜宴演出</span>
+          </div>
+          <div class="mt-2 flex items-center justify-between">
+            <h3 class="font-black text-base text-slate-900 flex items-center gap-1">
+              <span>🏯</span> 第④站·皇都侗寨
+            </h3>
+            <span class="text-xs text-indigo-700 font-bold">合拢宴夜色</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-0.5">无钉榫卯普修桥·侗族大歌·跳多耶</p>
+        </div>
+
+        <!-- CARD 5: 通道万佛山 (序号 ⑤早) -->
+        <div id="card-wanfoshan" onclick="showDetail('wanfoshan')" class="absolute bottom-[4%] left-[26%] w-60 bg-white rounded-2xl p-3 card-shadow border-2 border-amber-500 cursor-pointer hover:scale-105 transition transform z-20">
+          <div class="relative h-28 rounded-xl overflow-hidden bg-slate-100">
+            <img src="./wanfoshan_scenery_1790647889719.jpg" alt="通道万佛山" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+            <span class="absolute top-2 left-2 z-20 w-7 h-7 rounded-full bg-amber-600 text-white font-black text-sm flex items-center justify-center shadow-md border-2 border-white">
+              ⑤
+            </span>
+            <span class="absolute top-2 right-2 z-20 px-2 py-0.5 text-[10px] font-bold bg-amber-600 text-white rounded-md">🌦️ 14~20℃ 峰林</span>
+            <span class="absolute bottom-1.5 left-2 text-[10px] text-amber-200 font-bold">D3 08:30 - 12:00 索道天栈</span>
+          </div>
+          <div class="mt-2 flex items-center justify-between">
+            <h3 class="font-black text-base text-slate-900 flex items-center gap-1">
+              <span>🌄</span> 第⑤站·通道万佛山
+            </h3>
+            <span class="text-xs text-amber-700 font-bold">三千峰林</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-0.5">索道省力直达·360°空中玻璃挑台云海</p>
+        </div>
+
+        <!-- Pill 7: D4 大返程线路标 (序号 ⑦) -->
+        <div class="absolute top-[38%] left-[32%] z-20">
+          <div class="bg-red-600 text-white px-4 py-2 rounded-full card-shadow flex items-center gap-2 text-xs font-black shadow-xl border-2 border-white">
+            <span class="w-6 h-6 rounded-full bg-white text-red-600 font-black flex items-center justify-center text-xs">⑦</span>
+            <span>D4 晨光 06:30 错峰大返程</span>
+            <span class="bg-red-700/80 px-2 py-0.5 rounded text-[11px]">469 km ｜ 🌤️ 12~24℃ 转晴</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Interactive Detail Drawer Modal (Populates on clicking cards) -->
+    <div id="detail-modal" class="bg-white border border-slate-200 rounded-3xl p-5 md:p-6 card-shadow transition-all">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span id="modal-tag" class="px-3 py-1 text-xs font-black bg-blue-600 text-white rounded-full">第①站</span>
+          <h2 id="modal-title" class="text-lg md:text-xl font-black text-slate-900">长沙集合大本营 ➔ 启程与归宿</h2>
+        </div>
+        <span id="modal-date" class="text-xs text-slate-400 font-bold">10/2 晨 06:40 集结</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-xs">
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+          <div class="font-bold text-slate-800 mb-1.5 flex items-center gap-1 text-sm">
+            <span>🎫</span> 门票与费用政策
+          </div>
+          <p id="modal-tickets" class="text-slate-600 leading-relaxed">
+            无门票。提前一晚在群内确认各车胎压、ETC、儿童安全座椅与对讲机满电。
+          </p>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+          <div class="font-bold text-slate-800 mb-1.5 flex items-center gap-1 text-sm">
+            <span>👶</span> 亲子省力与带娃贴士
+          </div>
+          <p id="modal-family" class="text-slate-600 leading-relaxed">
+            为宝宝准备足量常温牛奶、小苏打饼干、绘本与湿纸巾，出发前半小时贴好晕车贴。
+          </p>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+          <div class="font-bold text-slate-800 mb-1.5 flex items-center gap-1 text-sm">
+            <span>🚗</span> 六车停放与行车避堵
+          </div>
+          <p id="modal-driving" class="text-slate-600 leading-relaxed">
+            1号领航车（达叔）与6号收尾车（我家）确认车队序列；出城设第一导航点为邵阳市区大店，避免队形打散。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Footer -->
+    <footer class="text-center text-xs text-slate-400 py-3">
+      制作参考：青海湖自驾路线卡片风格 ｜ 湘西南亲子自驾·六家六车专属 ｜ 官方咨询：崀山 0739-4705110 · 万佛山 0745-7871637
+    </footer>
+
+  </div>
+
+  <script>
+    const spotDetails = {
+      changsha: {
+        title: "第①站 · 长沙集合大本营 ➔ 启程与归宿",
+        tag: "第①站 / 第⑦站",
+        date: "10/2 06:40集结 ｜ 10/5 约16:30返抵",
+        tickets: "无门票。提前一晚在群内确认各车胎压、ETC、儿童安全座椅与对讲机满电。",
+        family: "为宝宝准备足量常温牛奶、小苏打饼干、绘本与湿纸巾，出发前半小时贴好晕车贴。",
+        driving: "1号领航车（达叔）与6号收尾车（我家）确认车队序列；出城设第一导航点为邵阳市区大店，避免队形打散。"
+      },
+      shaoyang: {
+        title: "第②站 · 邵阳市区 ➔ 舌尖第一站（午餐休整）",
+        tag: "第②站 · 美食中停",
+        date: "10/2 11:00 - 12:30",
+        tickets: "餐费参考50-80元/人。推荐邵阳厚圆粉（牛肉红烧码）、宝庆猪血丸子、原汁土鸡炖汤。",
+        family: "儿童主食推荐免辣肉饼蒸蛋、骨汤水饺、清炒时蔬；下车及时带孩子上卫生间活动。",
+        driving: "提前预约拥有宽敞车位的大型酒楼，六辆车尽量停在同一片区便于发车。"
+      },
+      langshan: {
+        title: "第③站 · 崀山辣椒峰片区 ➔ 世界丹霞自然遗产",
+        tag: "第③站 · 丹霞奇观",
+        date: "10/3 08:10 - 11:20",
+        tickets: "成人套票参考136元（三日有效），14岁以下儿童免门票（请随身携带身份证或户口本）。",
+        family: "只游辣椒峰一个片区，轻徒步拍红椒丹霞石柱全家福；雨后石阶微滑，务必手牵幼童。",
+        driving: "酒店早餐后8:10前到停车场，避开大巴峰值；12:25分整队发动转场通道。"
+      },
+      tongdao: {
+        title: "第④站/第⑥站 · 通道县城 & 玉带河湿地 ➔ 舒心大本营",
+        tag: "第④站/第⑥站",
+        date: "10/3 - 10/4 两晚连住",
+        tickets: "玉带河湿地公园为开放式生态步道，免费游览；如需体验游船以现场当日运营公告为准。",
+        family: "D3下午安排强制午休，给司机与幼童充电；傍晚玉带河临水岸边需全程看护孩子防溺水。",
+        driving: "通道县城至万佛山28km，至皇都侗文化村10km；D3晚餐后务必加满油，备战D4长途返程。"
+      },
+      huangdu: {
+        title: "第④站 · 皇都侗文化村 ➔ 千年纯木榫卯建筑与侗歌合拢宴",
+        tag: "第④站 · 侗寨非遗",
+        date: "10/3 17:20 - 20:15",
+        tickets: "演出与合拢宴按现场预订执行。核心看点：普修风雨桥、头寨鼓楼、芦笙踩堂、多耶舞。",
+        family: "侗家打油茶成人尝鲜即可，切忌给幼童当正餐；合拢宴敬酒气氛热烈，司机须以茶代酒！",
+        driving: "县城至皇都约10公里山水绿道，慢速驾驶；夜晚20:15演出结束后整队返回县城酒店。"
+      },
+      wanfoshan: {
+        title: "第⑤站 · 通道万佛山风景区 ➔ 三千丹霞峰林朝宗",
+        tag: "第⑤站 · 奇峰云海",
+        date: "10/4 08:30 - 12:00",
+        tickets: "门票约100元/人，儿童半价或免票；索道与观光车单购。大风雷雨天索道可能停运。",
+        family: "强烈推荐乘索道上山减少大幅爬升，绝壁天栈微风较大，给宝贝备薄防风外套，使用婴儿背带。",
+        driving: "山路弯道多，保持20-30米车距，对讲机保持畅通报弯道来车；中午下山回县城吃酸汤鱼。"
+      }
+    };
+
+    function showDetail(spotKey) {
+      const data = spotDetails[spotKey];
+      if (!data) return;
+      document.getElementById('modal-title').innerText = data.title;
+      document.getElementById('modal-tag').innerText = data.tag;
+      document.getElementById('modal-date').innerText = data.date;
+      document.getElementById('modal-tickets').innerText = data.tickets;
+      document.getElementById('modal-family').innerText = data.family;
+      document.getElementById('modal-driving').innerText = data.driving;
+
+      document.getElementById('detail-modal').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function setZoom(scale) {
+      const el = document.getElementById('map-inner-wrapper');
+      if (el) {
+        el.style.transform = `scale(${scale})`;
+      }
+    }
+  </script>
+</body>
+</html>

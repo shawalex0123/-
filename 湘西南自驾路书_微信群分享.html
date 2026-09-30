@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>六家六车·湘西南亲子自驾路书与电子导游</title>
+  <!-- Tailwind CSS -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    .safe-top {
+      padding-top: env(safe-area-inset-top, 10px);
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .tap-active:active {
+      transform: scale(0.97);
+      opacity: 0.9;
+    }
+    @keyframes pulseRoute {
+      0%, 100% { stroke-opacity: 0.9; stroke-width: 4px; }
+      50% { stroke-opacity: 0.5; stroke-width: 5px; }
+    }
+    .route-animated {
+      animation: pulseRoute 2.5s infinite ease-in-out;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 text-sm leading-relaxed antialiased min-h-screen pb-24">
+
+  <!-- Sticky Top Convoy & Emergency Bar -->
+  <header class="sticky top-0 z-50 glass-nav border-b border-slate-200/90 px-3 py-2 safe-top">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-500 text-white text-xs font-bold shadow-xs">
+          📻
+        </span>
+        <div class="leading-tight">
+          <div class="text-[10px] text-slate-500 font-medium">车队对讲机 (6车统一)</div>
+          <div class="text-xs font-black text-slate-900 tracking-wide">438.500 <span class="text-[10px] text-emerald-600 font-semibold">(06频道/亚音88.5)</span></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <a href="#section-walkie" class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-0.5 tap-active">
+          ❓ 对讲怎么用
+        </a>
+        <button onclick="toggleEditMode()" id="btn-edit-mode" class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold flex items-center gap-1 tap-active">
+          <span id="edit-icon">✏️</span> <span id="edit-text">编辑行程/酒店</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-3.5 pt-3 space-y-4">
+
+    <!-- Header Banner -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-800 via-blue-700 to-emerald-700 text-white p-5 shadow-sm">
+      <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-lg pointer-events-none"></div>
+      <div class="flex items-center justify-between">
+        <span class="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-black tracking-wide">
+          2026国庆 · 六家六车亲子自驾
+        </span>
+        <span class="text-[11px] text-blue-100 font-medium">10/2 - 10/5 (4天3晚)</span>
+      </div>
+      <h1 class="text-xl font-black tracking-tight mt-2.5">
+        🚙 湘西南奇峰与侗寨自驾路书
+      </h1>
+      <p class="text-xs text-blue-100/90 mt-1">
+        长沙 ➔ 邵阳 ➔ 新宁崀山 ➔ 通道侗寨 ➔ 错峰返长 · 全程约 1040km
+      </p>
+
+      <!-- 3 Key Stats -->
+      <div class="grid grid-cols-3 gap-2 mt-3.5 pt-3 border-t border-white/20 text-center">
+        <div>
+          <div class="text-[10px] text-blue-200">编队规模</div>
+          <div class="text-sm font-black text-amber-300">6家人 · 6辆车</div>
+        </div>
+        <div>
+          <div class="text-[10px] text-blue-200">总行驶里程</div>
+          <div class="text-sm font-black">~1040 km</div>
+        </div>
+        <div>
+          <div class="text-[10px] text-blue-200">核心景区</div>
+          <div class="text-sm font-black">辣椒峰/皇都/万佛山</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 🗺️ INTERACTIVE MAP (直观手机竖版·内嵌简单天气·行车箭头一目了然) -->
+    <!-- ========================================== -->
+    <section class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/90" id="section-map">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <span class="text-base text-blue-600">🗺️</span> 自驾行程全景路线图
+          </h2>
+          <p class="text-[10px] text-slate-400 mt-0.5">内嵌各站简明气温 ｜ 顺行车箭头 ①➔⑦ 一目了然</p>
+        </div>
+        <span class="px-2 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 rounded-full border border-blue-200">
+          点卡片查游玩/导航
+        </span>
+      </div>
+
+      <!-- Weather Quick Strip on top of Map (地图顶部天气速查条) -->
+      <div class="mb-2 p-2 rounded-xl bg-slate-50 border border-slate-200 text-[10px] text-slate-600 flex items-center justify-between overflow-x-auto no-scrollbar whitespace-nowrap">
+        <span class="font-bold text-blue-900">⛅ 各地实况:</span>
+        <span class="px-1.5 py-0.5 rounded bg-blue-100/70 text-blue-900 font-medium">D1 崀山 🌧️16~21℃</span>
+        <span class="px-1.5 py-0.5 rounded bg-purple-100/70 text-purple-900 font-medium">D2 侗寨 🌧️15~24℃</span>
+        <span class="px-1.5 py-0.5 rounded bg-amber-100/70 text-amber-900 font-medium">D3 万佛山 🌦️14~20℃</span>
+        <span class="px-1.5 py-0.5 rounded bg-emerald-100/70 text-emerald-900 font-medium">D4 返长 🌤️12~24℃</span>
+      </div>
+
+      <!-- Chronological Sequence Flow (先后顺序胶囊) -->
+      <div class="mb-2.5 overflow-x-auto no-scrollbar py-0.5">
+        <div class="flex items-center gap-1 text-[11px] font-bold min-w-[500px]">
+          <span class="text-slate-400 whitespace-nowrap text-[10px]">自驾顺序:</span>
+          <span onclick="selectMapSpot('changsha')" class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 cursor-pointer">①长沙</span>
+          <span class="text-blue-500 font-bold">➔</span>
+          <span onclick="selectMapSpot('shaoyang')" class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 cursor-pointer">②邵阳</span>
+          <span class="text-amber-500 font-bold">➔</span>
+          <span onclick="selectMapSpot('langshan')" class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-pointer">③崀山</span>
+          <span class="text-emerald-500 font-bold">➔</span>
+          <span onclick="selectMapSpot('huangdu')" class="px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 cursor-pointer">④皇都侗寨</span>
+          <span class="text-purple-500 font-bold">➔</span>
+          <span onclick="selectMapSpot('wanfoshan')" class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 cursor-pointer">⑤万佛山</span>
+          <span class="text-amber-500 font-bold">➔</span>
+          <span onclick="selectMapSpot('tongdao')" class="px-1.5 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200 cursor-pointer">⑥玉带河</span>
+          <span class="text-teal-500 font-bold">➔</span>
+          <span onclick="selectMapSpot('changsha')" class="px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200 cursor-pointer">⑦返长</span>
+        </div>
+      </div>
+
+      <!-- Pure Vertical Mobile Map Canvas (加高放大，含简洁天气徽章与行车实体大箭头) -->
+      <div class="relative bg-gradient-to-b from-sky-50/80 via-blue-50/30 to-emerald-50/40 rounded-2xl border border-blue-100 p-2 overflow-hidden select-none h-[630px]">
+        
+        <!-- SVG Canvas with Road Lines, Rivers and Directional Arrows -->
+        <svg class="w-full h-full relative z-10" viewBox="0 0 380 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background Rivers -->
+          <path d="M 330,10 Q 305,80 290,140 T 270,270 T 255,450" stroke="#bfdbfe" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
+          <path d="M 290,140 Q 230,170 170,190 T 105,300" stroke="#bfdbfe" stroke-width="4.5" stroke-linecap="round" opacity="0.45"/>
+          <text x="310" y="90" fill="#93c5fd" font-size="9" font-weight="bold">湘江</text>
+          <text x="185" y="165" fill="#93c5fd" font-size="8" font-weight="bold">资水</text>
+          <text x="30" y="330" fill="#a7f3d0" font-size="8" font-weight="bold">雪峰山脉</text>
+
+          <!-- ================= ROAD LINES (加粗并带行车流光) ================= -->
+          <!-- D1: ① 长沙 (275, 55) -> ② 邵阳 (185, 150) -->
+          <path d="M 270,55 Q 225,85 185,150" stroke="#93c5fd" stroke-width="11" stroke-linecap="round" opacity="0.5"/>
+          <path d="M 270,55 Q 225,85 185,150" stroke="#2563eb" stroke-width="5" stroke-linecap="round" class="route-animated"/>
+
+          <!-- D1下: ② 邵阳 (180, 185) -> ③ 崀山 (145, 275) -->
+          <path d="M 180,185 Q 160,230 145,275" stroke="#93c5fd" stroke-width="11" stroke-linecap="round" opacity="0.5"/>
+          <path d="M 180,185 Q 160,230 145,275" stroke="#2563eb" stroke-width="5" stroke-linecap="round" class="route-animated"/>
+
+          <!-- D2: ③ 崀山 (130, 315) -> ④ 通道县城 (75, 400) -->
+          <path d="M 130,315 Q 95,350 75,400" stroke="#c4b5fd" stroke-width="11" stroke-linecap="round" opacity="0.5"/>
+          <path d="M 130,315 Q 95,350 75,400" stroke="#7c3aed" stroke-width="5" stroke-linecap="round" class="route-animated"/>
+
+          <!-- D2晚: ④ 通道县城 (65, 440) -> ④ 皇都侗寨 (65, 510) -->
+          <path d="M 65,440 L 65,510" stroke="#c4b5fd" stroke-width="9" stroke-linecap="round" opacity="0.5"/>
+          <path d="M 65,440 L 65,510" stroke="#7c3aed" stroke-width="4" stroke-linecap="round" class="route-animated"/>
+
+          <!-- D3早: ④ 通道县城 (90, 440) -> ⑤ 万佛山 (185, 510) -->
+          <path d="M 90,440 Q 135,465 185,510" stroke="#fed7aa" stroke-width="9" stroke-linecap="round" opacity="0.6"/>
+          <path d="M 90,440 Q 135,465 185,510" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" class="route-animated"/>
+
+          <!-- D4: ⑦ 错峰返长 通道 (70, 385) -> 经长芷高速拱形回路 -> 长沙 (265, 60) -->
+          <path d="M 70,385 Q 165,190 265,60" stroke="#fca5a5" stroke-width="9" stroke-linecap="round" opacity="0.4" stroke-dasharray="9 7"/>
+          <path d="M 70,385 Q 165,190 265,60" stroke="#dc2626" stroke-width="4" stroke-linecap="round" stroke-dasharray="7 6" class="route-animated"/>
+
+          <!-- ================= DIRECTIONAL CHEVRONS (清晰可见的实体行车箭头) ================= -->
+          <!-- 1 -> 2: Changsha to Shaoyang (pointing southwest) -->
+          <g fill="#1d4ed8">
+            <polygon points="236,98 223,88 228,102 223,108" transform="rotate(145, 228, 98)"/>
+            <polygon points="208,130 195,120 200,134 195,140" transform="rotate(135, 200, 130)"/>
+          </g>
+
+          <!-- 2 -> 3: Shaoyang to Langshan (pointing south-southwest) -->
+          <g fill="#1d4ed8">
+            <polygon points="168,235 155,225 160,239 155,245" transform="rotate(115, 160, 235)"/>
+          </g>
+
+          <!-- 3 -> 4: Langshan to Tongdao (pointing west-southwest) -->
+          <g fill="#7c3aed">
+            <polygon points="106,358 93,348 98,362 93,368" transform="rotate(140, 98, 358)"/>
+          </g>
+
+          <!-- 4 -> 皇都 (pointing south) -->
+          <g fill="#7c3aed">
+            <polygon points="65,475 55,463 65,482 75,463"/>
+          </g>
+
+          <!-- 4 -> 万佛山 (pointing southeast) -->
+          <g fill="#d97706">
+            <polygon points="142,472 129,462 134,476 129,482" transform="rotate(40, 134, 472)"/>
+          </g>
+
+          <!-- 7: Return arrow pointing northeast back to Changsha -->
+          <g fill="#dc2626">
+            <polygon points="122,290 109,280 114,294 109,300" transform="rotate(-40, 114, 290)"/>
+            <polygon points="178,198 165,188 170,202 165,208" transform="rotate(-35, 170, 198)"/>
+            <polygon points="230,122 217,112 222,126 217,132" transform="rotate(-30, 222, 122)"/>
+          </g>
+
+          <!-- Road Pills rendered directly on the map -->
+          <!-- Changsha -> Shaoyang -->
+          <g transform="translate(196, 72)">
+            <rect width="72" height="14" rx="7" fill="#ffffff" stroke="#93c5fd" stroke-width="1"/>
+            <text x="36" y="10.5" fill="#1e40af" font-size="7.5" font-weight="bold" text-anchor="middle">🚗 221km 3.5h</text>
+          </g>
+
+          <!-- Shaoyang -> Langshan -->
+          <g transform="translate(160, 210)">
+            <rect width="68" height="14" rx="7" fill="#ffffff" stroke="#93c5fd" stroke-width="1"/>
+            <text x="34" y="10.5" fill="#1e40af" font-size="7.5" font-weight="bold" text-anchor="middle">🚗 127km 2.5h</text>
+          </g>
+
+          <!-- Langshan -> Tongdao -->
+          <g transform="translate(90, 325)">
+            <rect width="68" height="14" rx="7" fill="#ffffff" stroke="#c4b5fd" stroke-width="1"/>
+            <text x="34" y="10.5" fill="#6d28d9" font-size="7.5" font-weight="bold" text-anchor="middle">🚗 186km 3.5h</text>
+          </g>
+
+          <!-- D4 Return Badge -->
+          <g transform="translate(120, 160)">
+            <rect width="108" height="15" rx="7.5" fill="#fef2f2" stroke="#fca5a5" stroke-width="1"/>
+            <text x="54" y="11" fill="#b91c1c" font-size="7.5" font-weight="bold" text-anchor="middle">⚡ ⑦ 错峰返长 469km 🌤️</text>
+          </g>
+        </svg>
+
+        <!-- ================= CARD 1: 长沙大本营 (Top Right) ================= -->
+        <div onclick="selectMapSpot('changsha')" class="absolute top-2 right-2 w-38 bg-white/95 rounded-xl p-2 shadow-sm border border-blue-300 cursor-pointer tap-active z-20">
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-1">
+              <span class="w-5 h-5 rounded-full bg-blue-600 text-white font-black text-[10px] flex items-center justify-center shadow">①</span>
+              <span class="font-extrabold text-[11px] text-slate-900">长沙大本营</span>
+            </div>
+            <span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[9px] font-black">🌧️ 16-21℃</span>
+          </div>
+          <div class="text-[9px] text-slate-500 flex justify-between">
+            <span>D1发车 06:40</span>
+            <span class="text-blue-600 font-bold">D4安全抵长</span>
+          </div>
+        </div>
+
+        <!-- ================= CARD 2: 邵阳市区 (Upper Mid) ================= -->
+        <div onclick="selectMapSpot('shaoyang')" class="absolute top-[138px] left-[65px] w-36 bg-white/95 rounded-xl p-2 shadow-sm border border-amber-300 cursor-pointer tap-active z-20">
+          <div class="flex items-center justify-between mb-0.5">
+            <div class="flex items-center gap-1">
+              <span class="w-5 h-5 rounded-full bg-amber-500 text-white font-black text-[10px] flex items-center justify-center shadow">②</span>
+              <span class="font-extrabold text-[11px] text-slate-900">邵阳市区</span>
+            </div>
+            <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[9px] font-black">🌧️ 17-21℃</span>
+          </div>
+          <div class="text-[9px] text-amber-700 font-medium">D1午餐·热牛肉粉休整</div>
+        </div>
+
+        <!-- ================= CARD 3: 崀山辣椒峰 (Center) ================= -->
+        <div onclick="selectMapSpot('langshan')" class="absolute top-[252px] left-[50px] w-44 bg-white/95 rounded-xl p-2 shadow-sm border-2 border-emerald-400 cursor-pointer tap-active z-20">
+          <div class="relative h-16 rounded-lg overflow-hidden bg-slate-100 mb-1">
+            <img src="./langshan_danxia_1790647857422.jpg" alt="崀山" class="w-full h-full object-cover">
+            <span class="absolute top-1 left-1 z-20 w-4 h-4 rounded-full bg-emerald-600 text-white font-black text-[9px] flex items-center justify-center">③</span>
+            <span class="absolute top-1 right-1 z-20 px-1.5 py-0.5 text-[9px] bg-slate-900/80 text-white font-bold rounded">🌧️ 15-24℃</span>
+            <span class="absolute bottom-0.5 right-1 z-20 px-1 text-[8px] bg-emerald-700/80 text-white rounded">5A 丹霞</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="font-black text-[11px] text-slate-900">崀山辣椒峰</span>
+            <span class="text-[9px] text-emerald-700 font-bold">D1宿/D2轻徒步</span>
+          </div>
+        </div>
+
+        <!-- ================= CARD 4 BASE: 通道县城基地 (Lower Mid) ================= -->
+        <div onclick="selectMapSpot('tongdao')" class="absolute top-[380px] left-1.5 w-40 bg-white/95 rounded-xl p-2 shadow-sm border border-purple-300 cursor-pointer tap-active z-20">
+          <div class="flex items-center justify-between mb-0.5">
+            <div class="flex items-center gap-1">
+              <span class="w-5 h-5 rounded-full bg-purple-600 text-white font-black text-[10px] flex items-center justify-center shadow">④</span>
+              <span class="font-extrabold text-[11px] text-slate-900">通道县城基地</span>
+            </div>
+            <span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-900 text-[9px] font-black">🌧️ 15-23℃</span>
+          </div>
+          <div class="text-[9px] text-purple-600 font-semibold">D2-D3连住2晚·热酸汤鱼</div>
+        </div>
+
+        <!-- ================= CARD 4 SCENIC: 皇都侗寨 (Bottom Left) ================= -->
+        <div onclick="selectMapSpot('huangdu')" class="absolute bottom-2 left-1.5 w-44 bg-white/95 rounded-xl p-2 shadow-sm border-2 border-indigo-400 cursor-pointer tap-active z-20">
+          <div class="relative h-18 rounded-lg overflow-hidden bg-slate-100 mb-1">
+            <img src="./huangdu_dong_village_1790647879822.jpg" alt="皇都侗寨" class="w-full h-full object-cover">
+            <span class="absolute top-1 left-1 z-20 w-4 h-4 rounded-full bg-indigo-600 text-white font-black text-[9px] flex items-center justify-center">④</span>
+            <span class="absolute top-1 right-1 z-20 px-1.5 py-0.5 text-[9px] bg-slate-900/80 text-white font-bold rounded">🌧️ 16-22℃</span>
+            <span class="absolute bottom-0.5 right-1 z-20 px-1 text-[8px] bg-indigo-700/80 text-white rounded">侗寨非遗</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="font-black text-[11px] text-slate-900">皇都侗文化村</span>
+            <span class="text-[9px] text-indigo-700 font-bold">D2夜宴演出</span>
+          </div>
+        </div>
+
+        <!-- ================= CARD 5: 通道万佛山 (Bottom Right) ================= -->
+        <div onclick="selectMapSpot('wanfoshan')" class="absolute bottom-2 right-1.5 w-44 bg-white/95 rounded-xl p-2 shadow-sm border-2 border-amber-400 cursor-pointer tap-active z-20">
+          <div class="relative h-18 rounded-lg overflow-hidden bg-slate-100 mb-1">
+            <img src="./wanfoshan_scenery_1790647889719.jpg" alt="万佛山" class="w-full h-full object-cover">
+            <span class="absolute top-1 left-1 z-20 w-4 h-4 rounded-full bg-amber-600 text-white font-black text-[9px] flex items-center justify-center">⑤</span>
+            <span class="absolute top-1 right-1 z-20 px-1.5 py-0.5 text-[9px] bg-amber-900/80 text-white font-bold rounded">🌦️ 14-20℃</span>
+            <span class="absolute bottom-0.5 right-1 z-20 px-1 text-[8px] bg-amber-700/80 text-white rounded">山顶偏凉</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="font-black text-[11px] text-slate-900">通道万佛山</span>
+            <span class="text-[9px] text-amber-700 font-bold">D3索道天栈</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Active Destination Plan Card (Pops up when clicking any spot on map) -->
+      <div id="spot-plan-box" class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 transition-all">
+        <div class="flex items-center justify-between pb-1.5 border-b border-slate-200/80">
+          <div class="flex items-center gap-1.5">
+            <span id="spot-badge" class="px-2 py-0.5 text-[10px] font-bold bg-emerald-600 text-white rounded">5A 世界遗产</span>
+            <h3 id="spot-title" class="font-black text-slate-900 text-sm">崀山辣椒峰片区 · 游玩安排与计划</h3>
+          </div>
+          <span id="spot-time" class="text-[10px] text-slate-400">D2 08:10-11:20</span>
+        </div>
+        <div class="mt-1.5 flex items-center gap-2 text-xs">
+          <span class="text-blue-700 font-bold bg-blue-50 border border-blue-200 px-2 py-0.5 rounded text-[11px]" id="spot-weather-tag">
+            🌧️ 预报：小雨转阴 15℃~24℃
+          </span>
+          <span class="text-[11px] text-slate-500" id="spot-weather-tip">雨水湿滑，穿防滑鞋备雨衣</span>
+        </div>
+        <p id="spot-desc" class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+          <strong>游玩计划</strong>：雨天只玩辣椒峰单一片区！走平缓林荫栈道，近距离瞻仰巨大红椒石柱并拍摄六家全家福合影。无需爬陡峭险路，保护体能。
+        </p>
+        <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-200/60 text-[11px]">
+          <div>
+            <span class="text-slate-400">🎫 门票政策：</span>
+            <span id="spot-ticket" class="text-slate-700 font-medium">14岁以下免票，成人136元</span>
+          </div>
+          <div>
+            <span class="text-slate-400">👶 亲子贴士：</span>
+            <span id="spot-family" class="text-slate-700 font-medium">石阶防滑，备腰凳与温水</span>
+          </div>
+        </div>
+        <div class="mt-2.5 flex items-center gap-2">
+          <a id="spot-nav-btn" href="https://uri.amap.com/marker?position=110.8242,26.4172&name=崀山辣椒峰景区停车场" target="_blank" class="flex-1 py-1.5 px-3 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1 tap-active">
+            <span>🧭</span> <span id="spot-nav-text">一键导航至 崀山辣椒峰停车场</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- ⛅ 每日天气预报与亲子出行指南 (官方气象局实况校准版) -->
+    <!-- ========================================== -->
+    <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200" id="section-weather">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <span class="text-base text-blue-600">🌧️</span> 每日天气预报与雨天游玩提示
+          </h2>
+          <p class="text-[11px] text-slate-400 mt-0.5">气象台最新预报：受冷空气影响，假期前期有明显降温降雨</p>
+        </div>
+        <span class="text-[10px] text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full font-bold">降温降雨提醒</span>
+      </div>
+
+      <!-- Alert Callout -->
+      <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 mb-3 flex items-start gap-2">
+        <span class="text-base">⚠️</span>
+        <div class="leading-relaxed text-[11px]">
+          <strong>气象预警备忘</strong>：10月2日至4日受较强冷空气与切变线共同影响，湘西南（邵阳、新宁、通道）普遍有<strong>小到中雨且气温骤降（14℃~21℃）</strong>，早晚湿凉！<strong>务必备足儿童保暖厚外套、雨衣雨具与备用干爽鞋袜</strong>！
+        </div>
+      </div>
+
+      <!-- Weather Cards for D1 ~ D4 -->
+      <div class="space-y-2.5 text-xs">
+        
+        <!-- Day 1 Weather Card -->
+        <div class="p-3 rounded-xl bg-gradient-to-r from-blue-50/80 via-sky-50/40 to-transparent border border-blue-200 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-blue-600 text-white font-bold text-[10px]">D1 · 10/2</span>
+              <span class="font-extrabold text-slate-900">邵阳 ➔ 新宁崀山</span>
+            </div>
+            <div class="flex items-center gap-1.5 font-bold text-blue-800">
+              <span class="text-base">🌧️</span>
+              <span>小雨 16℃ ~ 21℃</span>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-600 flex items-center gap-3 pt-0.5">
+            <span>💨 北风微风</span>
+            <span>💧 湿度 85%</span>
+            <span>🌡️ 体感湿凉明显</span>
+          </div>
+          <div class="text-[11px] text-slate-700 bg-white/90 p-2 rounded-lg border border-blue-100 space-y-1">
+            <div>🧥 <strong>穿衣保暖</strong>：长袖T恤/衬衫 + <strong>保暖长袖夹克/卫衣外套</strong>；车内给孩子准备小毛毯。</div>
+            <div>🚗 <strong>行车提示</strong>：高速雨天路面湿滑，领航车带头拉大车距至150米以上，谨慎变道超车。</div>
+            <div>💡 <strong>游玩提示</strong>：下午抵崀山酒店后先安排孩子在温暖客房内午休冲热水澡；傍晚若有微雨，撑伞在酒店附近尝崀山柴火豆腐热汤，早早休息。</div>
+          </div>
+        </div>
+
+        <!-- Day 2 Weather Card -->
+        <div class="p-3 rounded-xl bg-gradient-to-r from-purple-50/80 via-indigo-50/40 to-transparent border border-purple-200 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-purple-600 text-white font-bold text-[10px]">D2 · 10/3</span>
+              <span class="font-extrabold text-slate-900">崀山辣椒峰 ➔ 通道侗寨</span>
+            </div>
+            <div class="flex items-center gap-1.5 font-bold text-purple-800">
+              <span class="text-base">🌧️</span>
+              <span>小雨转阴 15℃ ~ 24℃</span>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-600 flex items-center gap-3 pt-0.5">
+            <span>💨 西北风微风</span>
+            <span>💧 湿度 88%</span>
+            <span>🌫️ 丹霞云雾缭绕</span>
+          </div>
+          <div class="text-[11px] text-slate-700 bg-white/90 p-2 rounded-lg border border-purple-100 space-y-1">
+            <div>👟 <strong>装备必备</strong>：<strong>便携轻雨衣</strong>（登山打伞不安全）、<strong>防滑运动鞋/登山鞋</strong>（丹霞石阶雨水湿滑，严防滑倒）、多备2双儿童干爽棉袜。</div>
+            <div>💡 <strong>游玩提示</strong>：小雨中的辣椒峰云雾翻腾，景色格外奇幻！只走平缓主步道，牵紧幼童；傍晚皇都侗寨沿河气温降至16℃，看演出必须给孩子穿<strong>防风厚外套</strong>；喝热姜茶防寒，司机以茶代酒。</div>
+          </div>
+        </div>
+
+        <!-- Day 3 Weather Card -->
+        <div class="p-3 rounded-xl bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-transparent border border-amber-200 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-amber-600 text-white font-bold text-[10px]">D3 · 10/4</span>
+              <span class="font-extrabold text-slate-900">通道万佛山 ➔ 县城玉带河</span>
+            </div>
+            <div class="flex items-center gap-1.5 font-bold text-amber-800">
+              <span class="text-base">🌦️</span>
+              <span>中雨转小雨 14℃ ~ 20℃</span>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-600 flex items-center gap-3 pt-0.5">
+            <span>💨 山顶风力3-4级</span>
+            <span>💧 湿度 80%</span>
+            <span>❄️ 山顶体感仅约11-13℃</span>
+          </div>
+          <div class="text-[11px] text-slate-700 bg-white/90 p-2 rounded-lg border border-amber-100 space-y-1">
+            <div>🧥 <strong>装备重点</strong>：万佛山高空风大且气温低，全员穿<strong>冲锋衣/加厚防风外套</strong>、戴防风帽；备好雨衣。</div>
+            <div>💡 <strong>游玩提示</strong>：早上先致电万佛山（0745-7871637）确认索道正常开行；乘索道直达避开千级湿滑台阶；中午回县城吃热腾腾的<strong>侗家红酸汤野生鱼</strong>驱寒暖胃，下午在酒店安心午休；傍晚若雨大则改在室内活动，若雨停再至玉带河漫步。</div>
+          </div>
+        </div>
+
+        <!-- Day 4 Weather Card -->
+        <div class="p-3 rounded-xl bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-transparent border border-emerald-200 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px]">D4 · 10/5</span>
+              <span class="font-extrabold text-slate-900">通道 ➔ 沿途高速 ➔ 长沙</span>
+            </div>
+            <div class="flex items-center gap-1.5 font-bold text-emerald-800">
+              <span class="text-base">🌤️</span>
+              <span>雨停多云转晴 12℃ ~ 24℃</span>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-600 flex items-center gap-3 pt-0.5">
+            <span>💨 偏北风2级</span>
+            <span>💧 湿度 60%</span>
+            <span>☀️ 天气明显转好</span>
+          </div>
+          <div class="text-[11px] text-slate-700 bg-white/90 p-2 rounded-lg border border-emerald-100 space-y-1">
+            <div>🚗 <strong>返程大作战</strong>：冷空气过境后天气转好，但清晨06:30出发时<strong>气温较低（仅约12-14℃）</strong>且山区易发团雾！穿保暖衣物，开雾灯错峰出发；午后气温回升至24℃体感舒适，顺利抵长。</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <!-- ========================================== -->
+    <!-- 📅 逐日行程与时间节奏 (支持在线编辑修改) -->
+    <!-- ========================================== -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <span class="text-base text-indigo-600">📅</span> 逐日详细行程与时间表
+        </h2>
+        <div class="flex items-center gap-1 text-[11px]">
+          <button onclick="resetItinerary()" class="text-slate-400 hover:text-red-500">重置默认</button>
+        </div>
+      </div>
+
+      <!-- Itinerary items dynamically rendered from JS & LocalStorage -->
+      <div id="itinerary-cards-container" class="space-y-3">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 🚗 六车编队人员名册 (6家人6辆车) -->
+    <!-- ========================================== -->
+    <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <span class="text-base text-blue-600">🚗</span> 六车编队与人员分工 (6家6车)
+        </h2>
+        <span class="text-[10px] text-blue-600 font-bold">对讲呼号统一</span>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="p-2.5 rounded-xl bg-blue-50/70 border border-blue-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-blue-600 text-white font-black text-[10px]">1号领航车</span>
+            <div>
+              <div class="font-bold text-slate-900">达叔家（头车）</div>
+              <div class="text-[10px] text-slate-500">职责：带路领航、测速警示、岔道预告</div>
+            </div>
+          </div>
+          <span class="text-[11px] font-bold text-blue-700">对讲: 1号</span>
+        </div>
+
+        <div class="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-slate-600 text-white font-bold text-[10px]">2号车</span>
+            <div class="font-bold text-slate-800">熠坨家</div>
+          </div>
+          <span class="text-[11px] text-slate-500">保持100米跟车</span>
+        </div>
+
+        <div class="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-slate-600 text-white font-bold text-[10px]">3号车</span>
+            <div class="font-bold text-slate-800">小黄家</div>
+          </div>
+          <span class="text-[11px] text-slate-500">保持100米跟车</span>
+        </div>
+
+        <div class="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-slate-600 text-white font-bold text-[10px]">4号车</span>
+            <div class="font-bold text-slate-800">杨总家</div>
+          </div>
+          <span class="text-[11px] text-slate-500">保持100米跟车</span>
+        </div>
+
+        <div class="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-slate-600 text-white font-bold text-[10px]">5号车</span>
+            <div class="font-bold text-slate-800">雷姐家</div>
+          </div>
+          <span class="text-[11px] text-slate-500">保持100米跟车</span>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-amber-600 text-white font-black text-[10px]">6号收尾车</span>
+            <div>
+              <div class="font-bold text-slate-900">我家（压阵车）</div>
+              <div class="text-[10px] text-slate-500">职责：后方看护、防掉队、对讲呼应</div>
+            </div>
+          </div>
+          <span class="text-[11px] font-bold text-amber-700">对讲: 6号</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 🎒 亲子打包自检清单 (支持手机打勾保存) -->
+    <!-- ========================================== -->
+    <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <span class="text-base text-emerald-600">🎒</span> 亲子出游自检清单
+        </h2>
+        <span id="pack-progress" class="text-[11px] font-bold text-emerald-600">0/12 已准备</span>
+      </div>
+      <p class="text-[11px] text-slate-400 mb-3">直接点击打勾，手机会自动保存您的勾选状态：</p>
+      <div class="grid grid-cols-2 gap-2 text-xs" id="checklist-container">
+        <!-- JS rendered -->
+      </div>
+    </section>
+
+    <!-- AA Cost Rules -->
+    <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 text-xs space-y-2">
+      <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+        <span class="text-base text-amber-500">💰</span> 6家AA记账公约
+      </h2>
+      <ul class="space-y-1.5 text-slate-600 list-disc list-inside">
+        <li><strong>公共大支出</strong>：集体聚餐（合拢宴、特色菜）、集体门票，由财务统一登记，6家人按户AA结算。</li>
+        <li><strong>自驾私车费用</strong>：各车加油、高速过路费由各车车主自理。</li>
+        <li><strong>预算建议</strong>：每家预留 3500 - 5500 元（含住宿餐饮门票）。</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 📝 MODALS (酒店修改 & 行程节点修改) -->
+  <!-- ========================================== -->
+  <div id="hotel-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-bold text-slate-900 text-base" id="hotel-modal-title">修改酒店信息</h3>
+        <button onclick="closeHotelModal()" class="text-slate-400 text-lg">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-600 font-bold mb-1">酒店全称：</label>
+          <input type="text" id="input-hotel-name" class="w-full p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-xs">
+        </div>
+        <div>
+          <label class="block text-slate-600 font-bold mb-1">具体地址 / 导航关键词：</label>
+          <input type="text" id="input-hotel-addr" class="w-full p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-xs">
+        </div>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeHotelModal()" class="flex-1 py-2 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs tap-active">取消</button>
+        <button onclick="saveHotelModal()" class="flex-1 py-2 rounded-lg bg-blue-600 text-white font-bold text-xs tap-active">保存更新</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="item-edit-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3.5 shadow-xl">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-bold text-slate-900 text-base" id="item-edit-modal-title">编辑行程节点</h3>
+        <button onclick="closeItemModal()" class="text-slate-400 text-lg">✕</button>
+      </div>
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="block text-slate-600 font-bold mb-1">时间段 (如: 08:10-11:20)：</label>
+          <input type="text" id="input-item-time" class="w-full p-2 rounded-lg border border-slate-300 outline-none text-xs">
+        </div>
+        <div>
+          <label class="block text-slate-600 font-bold mb-1">标题 / 地点：</label>
+          <input type="text" id="input-item-title" class="w-full p-2 rounded-lg border border-slate-300 outline-none text-xs">
+        </div>
+        <div>
+          <label class="block text-slate-600 font-bold mb-1">详细游玩安排 / 亲子事项：</label>
+          <textarea id="input-item-desc" rows="3" class="w-full p-2 rounded-lg border border-slate-300 outline-none text-xs leading-relaxed"></textarea>
+        </div>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeItemModal()" class="flex-1 py-2 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs tap-active">取消</button>
+        <button onclick="saveItemModal()" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white font-bold text-xs tap-active">确认保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Floating Share Bar -->
+  <div class="fixed bottom-0 left-0 right-0 glass-nav border-t border-slate-200 p-2.5 z-40 safe-bottom">
+    <div class="max-w-md mx-auto flex items-center gap-2">
+      <button onclick="copyCurrentLink()" class="flex-1 py-2.5 px-3 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm tap-active">
+        <span>🔗</span> 复制链接发微信群
+      </button>
+      <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="py-2.5 px-3.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs tap-active">
+        ⬆️ 顶部
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Electronic Guide Tab Switcher
+    function switchGuideTab(tab) {
+      ['langshan', 'huangdu', 'wanfoshan', 'shaoyang'].forEach(t => {
+        const btn = document.getElementById('guide-tab-' + t);
+        const content = document.getElementById('guide-content-' + t);
+        if (t === tab) {
+          btn.className = "guide-btn px-3 py-1.5 rounded-xl font-bold bg-emerald-600 text-white whitespace-nowrap shadow-xs transition";
+          content.classList.remove('hidden');
+        } else {
+          btn.className = "guide-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-700 whitespace-nowrap transition";
+          content.classList.add('hidden');
+        }
+      });
+    }
+
+    // Map spots data (带准确气象实况)
+    const mapSpots = {
+      changsha: {
+        title: "长沙集合大本营 ➔ 启程与归宿",
+        badge: "第①站 / 第⑦站",
+        time: "10/2 06:40集结 ｜ 10/5 约16:30抵家",
+        weatherTag: "🌧️ 预报: 16℃~21℃ 小雨 / 10/5返长🌤️12~24℃",
+        weatherTip: "出发带好雨具，返程清晨防团雾",
+        desc: "六车集合对讲通联调试；贴车标；全车满油出发。D4预计16:30前抵长报平安。",
+        ticket: "无门票",
+        family: "为宝宝准备足量常温奶、纸巾、安全座椅与磨牙小零食",
+        navText: "一键导航至 长沙集合点",
+        navUrl: "https://uri.amap.com/marker?name=长沙市"
+      },
+      shaoyang: {
+        title: "邵阳市区 ➔ 舌尖第一站（午餐休整）",
+        badge: "第②站 · 美食中停",
+        time: "D1 11:00-12:30",
+        weatherTag: "🌧️ 预报: 17℃~21℃ 小雨湿凉",
+        weatherTip: "长邵高速雨天路滑，保持150米车距",
+        desc: "品尝邵阳地道厚圆粉（牛腩/红烧排骨码子）、宝庆猪血丸子；大店大车场停车，六车集中。",
+        ticket: "午餐约50-80元/人",
+        family: "儿童备免辣肉饼蒸蛋、骨汤水饺、清炒时蔬",
+        navText: "一键导航至 邵阳午餐点",
+        navUrl: "https://uri.amap.com/marker?position=111.4692,27.2388&name=邵阳市区统一午餐点"
+      },
+      langshan: {
+        title: "崀山辣椒峰片区 · 游玩安排与计划",
+        badge: "第③站 · 5A世界遗产",
+        time: "D2 08:10-11:20",
+        weatherTag: "🌧️ 预报: 15℃~24℃ 小雨转阴",
+        weatherTip: "石阶湿滑牵紧幼童，穿防滑鞋备雨衣",
+        desc: "雨天只走平缓林荫栈道！近距离瞻仰巨大红椒石柱并拍摄六家全家福合影。无需爬陡峭险路，保护体能。",
+        ticket: "14岁以下免门票，成人通票136元",
+        family: "石阶防滑，备轻便腰凳背带与温水，不走未开发野路",
+        navText: "一键导航至 崀山辣椒峰停车场",
+        navUrl: "https://uri.amap.com/marker?position=110.8242,26.4172&name=崀山辣椒峰景区停车场"
+      },
+      tongdao: {
+        title: "通道侗族自治县城 & 玉带河湿地",
+        badge: "第④/⑥站 · 基地连住2晚",
+        time: "D2-D3 连住",
+        weatherTag: "🌧️ 预报: 15℃~23℃ 阴雨温凉",
+        weatherTip: "连住2晚不折腾行李，热酸汤鱼驱寒",
+        desc: "大本营连住2晚不折腾行李。D3下午强制回酒店午休蓄水；傍晚玉带河湿地漫步吹风放风筝。",
+        ticket: "玉带河湿地公园免费开放",
+        family: "临水步道全程手牵幼童防滑倒防溺水",
+        navText: "一键导航至 通道县城酒店",
+        navUrl: "https://uri.amap.com/marker?position=109.7845,26.1578&name=通道县城酒店"
+      },
+      huangdu: {
+        title: "皇都侗文化村 ➔ 千年纯木风雨桥与合拢宴",
+        badge: "第④站 · 侗寨非遗",
+        time: "D2 17:20-20:15",
+        weatherTag: "🌧️ 预报: 16℃~22℃ 傍晚微雨",
+        weatherTip: "临河夜风凉，看演出必穿保暖厚外套",
+        desc: "游览榫卯普修桥、头寨鼓楼，体验侗家特色合拢宴与高山流水敬酒；看非遗芦笙踩堂与跳多耶。",
+        ticket: "按现场预约执行",
+        family: "司机以茶代酒；打油茶碱性大，切勿给幼儿当正餐",
+        navText: "一键导航至 皇都侗文化村",
+        navUrl: "https://uri.amap.com/marker?position=109.7214,26.0827&name=皇都侗文化村景区"
+      },
+      wanfoshan: {
+        title: "通道万佛山 ➔ 三千丹霞峰林朝宗",
+        badge: "第⑤站 · 峰林奇观",
+        time: "D3 08:30-12:00",
+        weatherTag: "🌦️ 预报: 14℃~20℃ (山顶体感11~13℃)",
+        weatherTip: "山顶风大气温低，穿加厚冲锋衣防风帽",
+        desc: "乘索道轻松上山，登临万佛朝宗360°空中玻璃悬挑观景台俯瞰三千峰林全景，省力护膝。",
+        ticket: "门票约100元，索道自理",
+        family: "绝壁天栈风大，备薄防风外套，幼童使用背带",
+        navText: "一键导航至 通道万佛山景区",
+        navUrl: "https://uri.amap.com/marker?position=109.7891,26.2415&name=通道万佛山国家森林公园"
+      }
+    };
+
+    function selectMapSpot(key) {
+      const data = mapSpots[key];
+      if (!data) return;
+      document.getElementById('spot-badge').innerText = data.badge;
+      document.getElementById('spot-title').innerText = data.title;
+      document.getElementById('spot-time').innerText = data.time;
+      document.getElementById('spot-desc').innerHTML = `<strong>游玩计划</strong>：${data.desc}`;
+      document.getElementById('spot-ticket').innerText = data.ticket;
+      document.getElementById('spot-family').innerText = data.family;
+      if (data.weatherTag) {
+        document.getElementById('spot-weather-tag').innerText = data.weatherTag;
+        document.getElementById('spot-weather-tip').innerText = data.weatherTip;
+      }
+      document.getElementById('spot-nav-text').innerText = data.navText;
+      document.getElementById('spot-nav-btn').href = data.navUrl;
+
+      const box = document.getElementById('spot-plan-box');
+      box.classList.add('ring-2', 'ring-blue-400');
+      setTimeout(() => box.classList.remove('ring-2', 'ring-blue-400'), 1200);
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // If user taps on a scenic spot, also switch electronic guide tab accordingly
+      if (key === 'langshan' || key === 'huangdu' || key === 'wanfoshan' || key === 'shaoyang') {
+        switchGuideTab(key);
+      }
+    }
+
+    // Default Itinerary Data Structure (校准天气版)
+    const defaultItinerary = [
+      {
+        dayId: "d1",
+        dayNum: "D1",
+        date: "10/2 周五",
+        title: "长沙 ➔ 邵阳 ➔ 新宁崀山",
+        subtitle: "约 348km ｜ 邵阳中停午餐，进驻崀山午休",
+        color: "blue",
+        weather: {
+          icon: "🌧️",
+          loc: "邵阳 / 新宁崀山",
+          condition: "小雨 (降温降雨)",
+          temp: "16℃ ~ 21℃",
+          cloth: "长袖T恤 + 保暖夹克/薄卫衣（体感湿凉，车内备小毛毯）",
+          tips: "降雨导致路滑，高速保持150米车距；到崀山先办入住强制孩子午休冲热水澡，傍晚小镇喝热土鸡汤，不追夜景。"
+        },
+        items: [
+          { time: "06:40-07:00", title: "长沙集合点", desc: "六车到齐、分发对讲机、贴六车编号贴纸；确认儿童座椅、尿不湿、雨具和保暖衣物。发车前统一加满油。" },
+          { time: "07:00-10:50", title: "长沙 ➔ 邵阳市区 (221km)", desc: "雨天国庆预留 3.5-4.5h。1号头车与6号收尾车协同；雨天控速，每90分钟由领航车提醒进服务区放水休整。" },
+          { time: "11:00-12:30", title: "邵阳市区午餐", desc: "统一午餐：热腾腾的邵阳牛肉厚圆粉、宝庆猪血丸子炒肉；儿童备免辣肉饼蛋羹、清炒青菜。" },
+          { time: "12:45-15:30", title: "邵阳 ➔ 崀山 (127km)", desc: "呼北高速南下，预留 2.5-3h。到酒店先办入住，第一晚不追景点，孩子温暖午休。" },
+          { time: "17:30-20:30", title: "崀山慢晚餐与散步", desc: "品尝崀山柴火豆腐热汤、清炖土鸡；小镇超市采购次日矿泉水与零食；20:30前回房早睡。" }
+        ]
+      },
+      {
+        dayId: "d2",
+        dayNum: "D2",
+        date: "10/3 周六",
+        title: "辣椒峰 ➔ 通道 ➔ 皇都侗寨",
+        subtitle: "约 196km ｜ 丹霞轻徒步，夜宿侗乡合拢宴",
+        color: "purple",
+        weather: {
+          icon: "🌧️",
+          loc: "崀山辣椒峰 ➔ 通道侗寨",
+          condition: "小雨转阴",
+          temp: "15℃ ~ 24℃",
+          cloth: "防滑运动鞋 + 便携雨衣（打伞登山不安全）；夜晚侗寨临河气温降至16℃，必穿防风厚外套",
+          tips: "丹霞石阶雨水湿滑务必牵紧孩子；雨中山色云雾翻滚更美；看侗歌演出备好小毯；司机以茶代酒；打油茶切勿给幼儿喝。"
+        },
+        items: [
+          { time: "07:00-07:40", title: "早起退房装车", desc: "酒店早餐后行李全部装车入尾箱；8:10 前务必抵达辣椒峰停车场，穿好防滑鞋。" },
+          { time: "08:10-11:20", title: "崀山辣椒峰轻徒步", desc: "雨天只走平缓主栈道！拍云雾缭绕中的红椒石柱全家福；14岁以下儿童免门票（带证明）。" },
+          { time: "11:30-12:20", title: "周边快捷简餐", desc: "12:25 整队发动发车，绝不拖拉延误。" },
+          { time: "12:30-15:45", title: "崀山 ➔ 通道县城 (186km)", desc: "国庆预留 3-4h。雨天山区高速谨慎驾驶，若晚于 16:30 到达则压缩酒店休息时间，优先赶往皇都侗寨。" },
+          { time: "17:20-20:15", title: "皇都侗文化村", desc: "普修风雨桥夜景、鼓楼合拢宴、非遗侗歌芦笙跳多耶；夜间注意添衣保暖，司机以茶代酒，20:30返程回县城酒店。" }
+        ]
+      },
+      {
+        dayId: "d3",
+        dayNum: "D3",
+        date: "10/4 周日",
+        title: "万佛山 ➔ 侗家酸汤鱼 ➔ 玉带河湿地",
+        subtitle: "约 33km ｜ 索道上山观景，下午深度午休慢享",
+        color: "amber",
+        weather: {
+          icon: "🌦️",
+          loc: "通道万佛山 ➔ 县城玉带河",
+          condition: "中雨转小雨",
+          temp: "14℃ ~ 20℃ (山顶约11-13℃)",
+          cloth: "万佛山高空气温低风力3-4级，全员穿加厚防风冲锋衣、防风帽，备好雨衣",
+          tips: "早发前致电确认索道开行；乘索道避开湿滑千级台阶；悬空天栈拿稳手机；中午吃热腾腾酸汤鱼驱寒；下午强制午休；傍晚若雨大在酒店休整。"
+        },
+        items: [
+          { time: "07:40-08:30", title: "县城 ➔ 万佛山 (28km)", desc: "提前电话确认索道；山路雨天慢行，车距拉开 30 米。" },
+          { time: "08:30-12:00", title: "万佛山轻徒步探索", desc: "乘索道直上核心绝壁观景平台，360°俯瞰三千座丹霞峰林云海；穿厚外套，幼童使用登山背带。" },
+          { time: "12:20-13:30", title: "县城特色午餐", desc: "尝招牌热气腾腾的侗家红酸汤野生鱼、清蒸库鱼、清炒时蔬；免辣驱寒好消化。" },
+          { time: "13:40-15:30", title: "酒店深度午休", desc: "这是关键体能蓄水池！大人们补觉，孩子睡好觉，烘干可能微湿的鞋袜。" },
+          { time: "16:00-17:30", title: "玉带河湿地公园", desc: "雨停沿河木栈道散步（儿童临水全程看护）；若雨大则在县城室内茶饮店小聚。" },
+          { time: "18:00-20:00", title: "收官晚宴 & 全车加油", desc: "聚餐后六车必须立即加满油箱，备齐D4返程车内早餐与水。20:30前早睡！" }
+        ]
+      },
+      {
+        dayId: "d4",
+        dayNum: "D4",
+        date: "10/5 周一",
+        title: "清晨 06:30 错峰 ➔ 平安返长",
+        subtitle: "约 469km ｜ 早起2小时，路上少堵4小时",
+        color: "red",
+        weather: {
+          icon: "🌤️",
+          loc: "通道 ➔ 高速沿线 ➔ 长沙",
+          condition: "雨停多云转晴",
+          temp: "12℃ ~ 24℃",
+          cloth: "清晨出发气温较低（12℃左右）穿厚外套，午后回升至24℃换舒适长袖",
+          tips: "清晨 06:30 准时发车上高速！清晨山区谨防团雾与晨露，开雾灯错峰；午后天气晴朗路况好，车内备足小面包温水，每2小时进站轮换驾驶。"
+        },
+        items: [
+          { time: "05:50-06:25", title: "退房与车检", desc: "快速退房，车上吃面包牛奶；检查六车无遗漏物品，对讲机通联。" },
+          { time: "06:30 准时", title: "发车上高速", desc: "利用清晨宝贵窗口期穿过易堵山区路段；清晨开雾灯防团雾，中途停靠服务区 2 次放水。" },
+          { time: "11:30-12:20", title: "服务区快捷午餐", desc: "儿童先吃饱，司机再换班。" },
+          { time: "约 16:30 前", title: "平安抵长", desc: "赶在下午进城大拥堵之前顺利进城！群内报平安，清算汇总公共支出。" }
+        ]
+      }
+    ];
+
+        let itineraryData = [];
+    let isEditMode = false;
+    let editingItemContext = null;
+    let editingHotelKey = null;
+
+    function loadItinerary() {
+      const saved = localStorage.getItem('hunan_itinerary_v6');
+      if (saved) {
+        try { itineraryData = JSON.parse(saved); } catch (e) { itineraryData = defaultItinerary; }
+      } else {
+        itineraryData = defaultItinerary;
+      }
+      renderItinerary();
+    }
+
+    function saveItinerary() {
+      localStorage.setItem('hunan_itinerary_v6', JSON.stringify(itineraryData));
+      renderItinerary();
+    }
+
+    function resetItinerary() {
+      if (confirm("确定要将行程重置为初始规划版本吗？")) {
+        localStorage.removeItem('hunan_itinerary_v6');
+        itineraryData = JSON.parse(JSON.stringify(defaultItinerary));
+        renderItinerary();
+        alert("已恢复默认行程！");
+      }
+    }
+
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      const btn = document.getElementById('btn-edit-mode');
+      const text = document.getElementById('edit-text');
+      const icon = document.getElementById('edit-icon');
+      if (isEditMode) {
+        btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'border-indigo-200');
+        btn.classList.add('bg-amber-500', 'text-white', 'border-amber-600');
+        text.innerText = "完成修改";
+        icon.innerText = "💾";
+      } else {
+        btn.classList.remove('bg-amber-500', 'text-white', 'border-amber-600');
+        btn.classList.add('bg-indigo-50', 'text-indigo-700', 'border-indigo-200');
+        text.innerText = "编辑行程/酒店";
+        icon.innerText = "✏️";
+      }
+      renderItinerary();
+    }
+
+    function renderItinerary() {
+      const container = document.getElementById('itinerary-cards-container');
+      container.innerHTML = '';
+
+      itineraryData.forEach((day, dIdx) => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden";
+
+        let weatherHtml = '';
+        if (day.weather) {
+          weatherHtml = `
+            <div class="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/90 text-xs text-amber-950 mb-2.5 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold flex items-center gap-1.5 text-amber-900">
+                  <span class="text-sm">${day.weather.icon}</span>
+                  <span>${day.weather.loc} · ${day.weather.condition}</span>
+                  <span class="text-amber-700 font-extrabold ml-1">${day.weather.temp}</span>
+                </span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded bg-white text-amber-800 font-bold border border-amber-200">气温&穿衣</span>
+              </div>
+              <div class="text-[11px] text-slate-700 leading-tight">
+                👕 <strong>穿衣指南</strong>：${day.weather.cloth}
+              </div>
+              <div class="text-[11px] text-slate-700 leading-tight">
+                💡 <strong>游玩提示</strong>：${day.weather.tips}
+              </div>
+            </div>
+          `;
+        }
+
+        let itemsHtml = '';
+        day.items.forEach((item, iIdx) => {
+          itemsHtml += `
+            <div class="flex gap-2 items-start py-1 border-b border-slate-100 last:border-none">
+              <span class="text-${day.color}-600 font-bold whitespace-nowrap pt-0.5 text-xs">${item.time}</span>
+              <div class="flex-1 text-xs">
+                <strong>${item.title}</strong>：${item.desc}
+              </div>
+              ${isEditMode ? `
+                <div class="flex gap-1 pl-1">
+                  <button onclick="openItemModal(${dIdx}, ${iIdx})" class="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">改</button>
+                  <button onclick="deleteItem(${dIdx}, ${iIdx})" class="px-1.5 py-0.5 bg-red-50 text-red-600 rounded text-[10px]">删</button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        });
+
+        if (isEditMode) {
+          itemsHtml += `
+            <button onclick="addItem(${dIdx})" class="w-full mt-2 py-1.5 border border-dashed border-indigo-300 rounded-lg text-indigo-600 font-bold text-xs hover:bg-indigo-50">
+              ➕ 添加本天行程节点
+            </button>
+          `;
+        }
+
+        card.innerHTML = `
+          <div onclick="toggleDayContent('${day.dayId}')" class="p-3.5 flex items-center justify-between cursor-pointer bg-gradient-to-r from-${day.color}-50/40 to-transparent">
+            <div class="flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-${day.color}-600 text-white flex flex-col items-center justify-center font-bold leading-none">
+                <span class="text-[8px] font-normal opacity-80">${day.date.split(' ')[0]}</span>
+                <span class="text-xs">${day.dayNum}</span>
+              </span>
+              <div>
+                <div class="font-bold text-slate-900 text-xs">${day.title}</div>
+                <div class="text-[10px] text-slate-500">${day.subtitle}</div>
+              </div>
+            </div>
+            <span id="arrow-${day.dayId}" class="text-slate-400 text-xs transition transform ${dIdx === 0 ? 'rotate-180' : ''}">▼</span>
+          </div>
+          <div id="content-${day.dayId}" class="${dIdx === 0 ? '' : 'hidden'} px-3.5 pb-3.5 pt-1 space-y-2 text-xs border-t border-slate-100">
+            ${weatherHtml}${itemsHtml}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function toggleDayContent(id) {
+      const content = document.getElementById('content-' + id);
+      const arrow = document.getElementById('arrow-' + id);
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        arrow.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        arrow.classList.remove('rotate-180');
+      }
+    }
+
+    function openItemModal(dIdx, iIdx) {
+      editingItemContext = { dIdx, iIdx };
+      const item = itineraryData[dIdx].items[iIdx];
+      document.getElementById('item-edit-modal-title').innerText = `编辑节点 (${itineraryData[dIdx].dayNum})`;
+      document.getElementById('input-item-time').value = item.time;
+      document.getElementById('input-item-title').value = item.title;
+      document.getElementById('input-item-desc').value = item.desc;
+      document.getElementById('item-edit-modal').classList.remove('hidden');
+    }
+
+    function addItem(dIdx) {
+      const newIdx = itineraryData[dIdx].items.length;
+      itineraryData[dIdx].items.push({
+        time: "12:00-13:00",
+        title: "新行程节点",
+        desc: "请输入具体的游玩或就餐说明"
+      });
+      openItemModal(dIdx, newIdx);
+    }
+
+    function deleteItem(dIdx, iIdx) {
+      if (confirm("确定要删除这个节点吗？")) {
+        itineraryData[dIdx].items.splice(iIdx, 1);
+        saveItinerary();
+      }
+    }
+
+    function closeItemModal() {
+      document.getElementById('item-edit-modal').classList.add('hidden');
+      editingItemContext = null;
+    }
+
+    function saveItemModal() {
+      if (!editingItemContext) return;
+      const { dIdx, iIdx } = editingItemContext;
+      itineraryData[dIdx].items[iIdx] = {
+        time: document.getElementById('input-item-time').value.trim(),
+        title: document.getElementById('input-item-title').value.trim(),
+        desc: document.getElementById('input-item-desc').value.trim()
+      };
+      saveItinerary();
+      closeItemModal();
+    }
+
+    // Hotel Management & LocalStorage
+    const defaultHotels = {
+      langshan: {
+        name: "新宁崀山特色度假酒店 (待定)",
+        addr: "湖南省邵阳市新宁县崀山大道/景区周边"
+      },
+      tongdao: {
+        name: "通道县城品质舒适酒店 (待定)",
+        addr: "湖南省怀化市通道侗族自治县城区"
+      }
+    };
+
+    function loadHotels() {
+      const saved = JSON.parse(localStorage.getItem('hunan_hotels_v6') || '{}');
+      const hLangshan = saved.langshan || defaultHotels.langshan;
+      const hTongdao = saved.tongdao || defaultHotels.tongdao;
+
+      document.getElementById('display-hotel-langshan-name').innerText = hLangshan.name;
+      document.getElementById('display-hotel-langshan-addr').innerText = hLangshan.addr;
+      document.getElementById('nav-hotel-langshan').href = `https://uri.amap.com/marker?name=${encodeURIComponent(hLangshan.name)}`;
+
+      document.getElementById('display-hotel-tongdao-name').innerText = hTongdao.name;
+      document.getElementById('display-hotel-tongdao-addr').innerText = hTongdao.addr;
+      document.getElementById('nav-hotel-tongdao').href = `https://uri.amap.com/marker?name=${encodeURIComponent(hTongdao.name)}`;
+    }
+
+    function editHotel(key) {
+      editingHotelKey = key;
+      const saved = JSON.parse(localStorage.getItem('hunan_hotels_v6') || '{}');
+      const current = saved[key] || defaultHotels[key];
+
+      document.getElementById('hotel-modal-title').innerText = key === 'langshan' ? '修改 D1 崀山酒店' : '修改 D2-D3 通道酒店';
+      document.getElementById('input-hotel-name').value = current.name;
+      document.getElementById('input-hotel-addr').value = current.addr;
+      document.getElementById('hotel-modal').classList.remove('hidden');
+    }
+
+    function closeHotelModal() {
+      document.getElementById('hotel-modal').classList.add('hidden');
+      editingHotelKey = null;
+    }
+
+    function saveHotelModal() {
+      if (!editingHotelKey) return;
+      const name = document.getElementById('input-hotel-name').value.trim();
+      const addr = document.getElementById('input-hotel-addr').value.trim();
+
+      const saved = JSON.parse(localStorage.getItem('hunan_hotels_v6') || '{}');
+      saved[editingHotelKey] = { name, addr };
+      localStorage.setItem('hunan_hotels_v6', JSON.stringify(saved));
+
+      loadHotels();
+      closeHotelModal();
+      alert("🎉 酒店信息已更新！一键导航链接已自动同步！");
+    }
+
+    // Interactive Checklist with localStorage
+    const checkItems = [
+      "儿童身份证/户口本", "大人身份证/驾照", "车队对讲机(充饱电)",
+      "便携雨衣/登山防滑鞋", "加厚保暖外套/冲锋衣", "备用干爽袜子与鞋",
+      "美林/泰诺林感冒药", "晕车贴与创口贴", "防蚊液与薄荷膏",
+      "儿童保温水壶", "轻便腰凳/登山背带", "大号垃圾袋/充电线"
+    ];
+
+    function initChecklist() {
+      const saved = JSON.parse(localStorage.getItem('hunan_roadtrip_checks_v6') || '{}');
+      const container = document.getElementById('checklist-container');
+      container.innerHTML = '';
+
+      let checkedCount = 0;
+      checkItems.forEach((item, idx) => {
+        const isChecked = !!saved[idx];
+        if (isChecked) checkedCount++;
+
+        const div = document.createElement('div');
+        div.className = `p-2 rounded-xl border flex items-center gap-2 cursor-pointer transition ${isChecked ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-medium' : 'bg-slate-50 border-slate-200 text-slate-700'}`;
+        div.onclick = () => toggleCheck(idx);
+
+        div.innerHTML = `
+          <input type="checkbox" ${isChecked ? 'checked' : ''} class="rounded text-emerald-600 focus:ring-0 pointer-events-none">
+          <span class="truncate">${item}</span>
+        `;
+        container.appendChild(div);
+      });
+
+      document.getElementById('pack-progress').innerText = `${checkedCount}/${checkItems.length} 已准备`;
+    }
+
+    function toggleCheck(idx) {
+      const saved = JSON.parse(localStorage.getItem('hunan_roadtrip_checks_v6') || '{}');
+      saved[idx] = !saved[idx];
+      localStorage.setItem('hunan_roadtrip_checks_v6', JSON.stringify(saved));
+      initChecklist();
+    }
+
+    function copyCurrentLink() {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          alert("🎉 链接已复制！直接发送到微信群即可！");
+        }).catch(() => {
+          prompt("请长按复制本网页网址发送至微信群：", window.location.href);
+        });
+      } else {
+        prompt("请长按复制本网页网址发送至微信群：", window.location.href);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadHotels();
+      loadItinerary();
+      initChecklist();
+    });
+  </script>
+</body>
+</html>
